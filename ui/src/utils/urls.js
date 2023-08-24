@@ -4,6 +4,7 @@ export const urls = {
   loginURL: baseURL + "login",
   signupURL: baseURL + "signup",
   logoutURL: baseURL + "logout",
+  verifyOtpURL: baseURL + "verifyOtp",
   getEvents: baseURL + "getEvents",
   addEvent: baseURL + "addEvent",
   editEvent: baseURL + "editEvent",

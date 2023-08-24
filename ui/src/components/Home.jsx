@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
-import { addEventAPI, getEventsAPI } from "../utils/apis";
+import {
+  addEventAPI,
+  deleteEventAPI,
+  editEventAPI,
+  getEventsAPI,
+} from "../utils/apis";
 
 export default function Home() {
   const [event, setEvent] = useState("");
   const [errors, setErrors] = useState(null);
   const [loading, setLoading] = useState(false);
   const [allEvents, setAllEvents] = useState([]);
+  const [buttonText, setButtonText] = useState("Add Event");
+  const [eventId, setEventId] = useState("");
 
   function getEvents() {
     getEventsAPI()
@@ -15,31 +22,67 @@ export default function Home() {
         }
       })
       .catch((err) => {
-        setErrors(err);
+        setErrors(err?.response?.data);
       });
   }
 
-  function addEvent() {
-    setLoading(true);
-    setErrors(null);
-    const payload = {
-      name: event,
-      createdAt: new Date(),
-    };
+  function addEditEvent() {
+    if (buttonText === "Edit Event") {
+      editEventAPI({ id: eventId, name: event })
+        .then((res) => {
+          if (res.data.success) {
+            setEvent("");
+            setEventId("");
+            setButtonText("Add Event");
+            getEvents();
+          }
+        })
+        .catch((err) => {
+          setErrors(err?.response?.data);
+        });
+    } else {
+      setLoading(true);
+      setErrors(null);
+      const payload = {
+        name: event,
+        createdAt: new Date(),
+      };
 
-    addEventAPI(payload)
+      addEventAPI(payload)
+        .then((res) => {
+          if (res.data.success) {
+            setEvent("");
+            getEvents();
+          }
+        })
+        .catch((err) => {
+          setErrors(err?.response?.data);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }
+
+  function deleteEvent(id) {
+    setErrors(null);
+
+    deleteEventAPI(id)
       .then((res) => {
         if (res.data.success) {
-          setEvent("");
           getEvents();
         }
       })
       .catch((err) => {
-        setErrors(err);
-      })
-      .finally(() => {
-        setLoading(false);
+        setErrors(err?.response?.data);
       });
+  }
+
+  function editEvent(e) {
+    setErrors(null);
+    setEvent(e.name);
+    setEventId(e._id);
+    setButtonText("Edit Event");
   }
 
   useEffect(() => {
@@ -54,7 +97,8 @@ export default function Home() {
         value={event}
         onChange={(e) => setEvent(e.target.value)}
       />
-      <button disabled={!event} onClick={addEvent}>
+
+      <button disabled={!event} onClick={addEditEvent}>
         {loading ? (
           <div class="d-flex justify-content-center">
             <div class="spinner-border" role="status">
@@ -62,16 +106,23 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <>Add Event</>
+          <>{buttonText}</>
         )}
       </button>
+
+      {errors && (
+        <div>
+          {errors.errorCode} - {errors.errorMessage}
+        </div>
+      )}
 
       <div className="mt-4">
         {allEvents.map((e) => {
           return (
-            <>
-              <div>{e.name}</div>
-            </>
+            <div className="p-2" key={e._id}>
+              {e.name} <button onClick={() => editEvent(e)}>Edit</button> &nbsp;
+              <button onClick={() => deleteEvent(e._id)}>Delete</button>
+            </div>
           );
         })}
       </div>
