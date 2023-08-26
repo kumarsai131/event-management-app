@@ -5,6 +5,7 @@ const userModelSchema = new schema({
   username: {
     type: String,
     required: true,
+    minlength: 8,
   },
   password: {
     type: String,
@@ -20,6 +21,12 @@ const userModelSchema = new schema({
   },
   createdAt: {
     type: Date,
+  },
+  id: {
+    type: String,
+  },
+  otp: {
+    type: String,
   },
 });
 
