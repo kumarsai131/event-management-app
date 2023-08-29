@@ -1,9 +1,9 @@
 import axios from "axios";
 import { urls } from "./urls";
 
-export const loginAPI = async () => {
+export const loginAPI = async (payload) => {
   try {
-    return await axios.post(urls.loginURL, {});
+    return await axios.post(urls.loginURL, { ...payload });
   } catch (err) {
     return Promise.reject(err);
   }
@@ -33,9 +33,9 @@ export const verifyOtpAPI = async (payload) => {
   }
 };
 
-export const getEventsAPI = async () => {
+export const getEventsAPI = async (queryParam) => {
   try {
-    return await axios.get(urls.getEvents);
+    return await axios.get(urls.getEvents + queryParam);
   } catch (err) {
     return Promise.reject(err);
   }
@@ -60,6 +60,14 @@ export const editEventAPI = async ({ id, name }) => {
 export const deleteEventAPI = async (id) => {
   try {
     return await axios.delete(urls.deleteEvent + `?id=${id}`);
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+export const getAllUsersAPI = async () => {
+  try {
+    return await axios.get(urls.getAllUsers);
   } catch (err) {
     return Promise.reject(err);
   }

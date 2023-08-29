@@ -4,6 +4,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Home from "./components/Home";
 import Logout from "./components/Logout";
+import Admin from "./components/Admin";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/home" element={<Home />} />
         <Route path="*" element={<>Route Not Found</>} />

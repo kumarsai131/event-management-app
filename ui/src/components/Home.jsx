@@ -5,6 +5,7 @@ import {
   editEventAPI,
   getEventsAPI,
 } from "../utils/apis";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const [event, setEvent] = useState("");
@@ -13,9 +14,11 @@ export default function Home() {
   const [allEvents, setAllEvents] = useState([]);
   const [buttonText, setButtonText] = useState("Add Event");
   const [eventId, setEventId] = useState("");
+  const navigate = useNavigate();
+  const [sort, setSort] = useState(false);
 
-  function getEvents() {
-    getEventsAPI()
+  function getEvents(queryParam) {
+    getEventsAPI(queryParam || "")
       .then((res) => {
         if (res.data.success) {
           setAllEvents(res.data.events);
@@ -86,11 +89,28 @@ export default function Home() {
   }
 
   useEffect(() => {
-    getEvents();
+    if (sessionStorage.getItem("token")) {
+      getEvents();
+    } else {
+      navigate("/login");
+    }
   }, []);
+
+  function logout() {
+    sessionStorage.clear();
+    navigate("/login");
+  }
+
+  function getSortedEvents() {
+    setSort(!sort);
+    getEvents(sort ? "" : "?sort=down");
+  }
 
   return (
     <div className="mt-5">
+      <div className="text-end pe-5">
+        <button onClick={logout}>Logout</button>
+      </div>
       <input
         type="text"
         placeholder="Enter a event"
@@ -110,6 +130,10 @@ export default function Home() {
         )}
       </button>
 
+      <button className="ms-5" onClick={getSortedEvents}>
+        {sort ? "Sort Up" : "Sort Down"}
+      </button>
+
       {errors && (
         <div>
           {errors.errorCode} - {errors.errorMessage}
@@ -120,8 +144,17 @@ export default function Home() {
         {allEvents.map((e) => {
           return (
             <div className="p-2" key={e._id}>
-              {e.name} <button onClick={() => editEvent(e)}>Edit</button> &nbsp;
-              <button onClick={() => deleteEvent(e._id)}>Delete</button>
+              {e.name}{" "}
+              <button onClick={() => editEvent(e)} disabled={e.createdByAdmin}>
+                Edit
+              </button>{" "}
+              &nbsp;
+              <button
+                onClick={() => deleteEvent(e._id)}
+                disabled={e.createdByAdmin}
+              >
+                Delete
+              </button>
             </div>
           );
         })}

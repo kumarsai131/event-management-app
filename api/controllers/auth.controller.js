@@ -4,12 +4,36 @@ const { v4 } = require("uuid");
 const nodemailer = require("nodemailer");
 const nodeCache = require("node-cache");
 const userCache = new nodeCache({ stdTTL: 300 });
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const LoginController = expressAsyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  const checkUser = await usersModel.find({ email: { $eq: email } });
+
+  if (checkUser.length === 0) {
+    res.status(400);
+    throw new Error("User is not signed up.");
+  } else {
+    const checkPassword = await bcrypt.compare(
+      atob(password),
+      checkUser[0].password
+    );
+    if (!checkPassword) {
+      res.status(400);
+      throw new Error("Incorrect password");
+    }
+  }
+
   try {
-    await usersModel.find();
+    const token = generateToken(email, checkUser[0]._id);
+    const refreshToken = generateRefreshToken(email, checkUser[0]._id);
     res.json({
       success: true,
+      token: token,
+      refreshToken: refreshToken,
+      role: checkUser[0].role,
     });
   } catch (err) {}
 });
@@ -118,6 +142,18 @@ const VerifyOtpController = expressAsyncHandler(async (req, res, next) => {
 function generateOtp() {
   let otp = Math.random() * 1000000;
   return parseInt(otp);
+}
+
+function generateToken(email, id) {
+  return jwt.sign({ email: email, id: id }, process.env.TOKEN_SECRET, {
+    expiresIn: "30m",
+  });
+}
+
+function generateRefreshToken(email, id) {
+  return jwt.sign({ email: email, id: id }, process.env.REFRESH_SECRET, {
+    expiresIn: "5m",
+  });
 }
 
 module.exports = {

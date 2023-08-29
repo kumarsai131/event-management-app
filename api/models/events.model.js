@@ -13,6 +13,11 @@ const eventsModelSchema = new schema({
   updatedAt: {
     type: Date,
   },
+  userId: [mongoose.Types.ObjectId],
+  createdByAdmin: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const eventsModel = mongoose.model("eventsModel", eventsModelSchema);

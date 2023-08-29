@@ -4,9 +4,11 @@ const {
   getEventsController,
   editEventController,
   deleteEventController,
+  getAllUsersController,
 } = require("../controllers/events.controller");
 const router = express.Router();
 
+router.get("/getAllUsers", getAllUsersController);
 router.get("/getEvents", getEventsController);
 router.post("/addEvent", addEventController);
 router.put("/editEvent", editEventController);
